@@ -4,6 +4,8 @@ import random
 from docx import Document
 import os
 
+import helper
+
 
 def tokenize_text(text):
     # Tokenizes the input text into words.
@@ -138,35 +140,35 @@ def count_same_entries(list1, list2):
     return same_entries_count
 
 
-def read_text_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return file.read()
-
-
-def read_word_file(file_path):
-    doc = Document(file_path)
-    return ' '.join(paragraph.text for paragraph in doc.paragraphs)
-
-
-def load_document(file_path):
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"The file {file_path} does not exist.")
-
-    _, file_extension = os.path.splitext(file_path)
-
-    if file_extension.lower() == '.txt':
-        return read_text_file(file_path)
-    elif file_extension.lower() == '.docx':
-        return read_word_file(file_path)
-    else:
-        raise ValueError("Unsupported file type. Please provide a .txt or .docx file.")
+# def read_text_file(file_path):
+#     with open(file_path, 'r', encoding='utf-8') as file:
+#         return file.read()
+#
+#
+# def read_word_file(file_path):
+#     doc = Document(file_path)
+#     return ' '.join(paragraph.text for paragraph in doc.paragraphs)
+#
+#
+# def load_document(file_path):
+#     if not os.path.isfile(file_path):
+#         raise FileNotFoundError(f"The file {file_path} does not exist.")
+#
+#     _, file_extension = os.path.splitext(file_path)
+#
+#     if file_extension.lower() == '.txt':
+#         return read_text_file(file_path)
+#     elif file_extension.lower() == '.docx':
+#         return read_word_file(file_path)
+#     else:
+#         raise ValueError("Unsupported file type. Please provide a .txt or .docx file.")
 
 
 file_path1 = 'documents/document1.txt'
 file_path2 = 'documents/document1_940.txt'
 
-document1 = load_document(file_path1)
-document2 = load_document(file_path2)
+document1 = helper.load_document(file_path1)
+document2 = helper.load_document(file_path2)
 n = 8  # Change this to any n for n-grams
 num_permutations = 2500
 seed_value = 0
