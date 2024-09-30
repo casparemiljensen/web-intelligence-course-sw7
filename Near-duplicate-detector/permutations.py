@@ -45,22 +45,54 @@ def n_gram_shingler(text, n):
     return generate_n_grams(tokens, n)
 
 
-def hash_and_permute_shingles(shingles, num_perm, seed):
-    hash_function = hashlib.sha256  # Using MD5 as an example
+# def hash_and_permute_shingles(shingles, num_perm, seed):
+#     hash_function = hashlib.sha256  # Using MD5 as an example
+#     min_hashes = []
+#     random.seed(seed)
+#     # print(random.getstate()[1][0])  # Take the minimum hash value
+#     # Step 1: Hash all shingles first
+#     hashed_shingles = [hash_function(shingle.encode('utf-8')).hexdigest()[:16] for shingle in shingles]
+#     hashed_shingles = [int(hash_val, 16) for hash_val in hashed_shingles]  # Convert to integer
+#
+#     # Step 2: Permutate and extract min index
+#     for _ in range(num_perm):
+#         shuffled = list(hashed_shingles)
+#         random.shuffle(shuffled)
+#         min_hash = shuffled[0]
+#         min_hashes.append(min_hash)
+#     return set(min_hashes)
+
+def hash_and_permute_shingles(shingles1, shingles2, num_permutations):
+    hash_function = hashlib.md5  # Using MD5 as an example
     min_hashes = []
-    random.seed(seed)
-    # print(random.getstate()[1][0])  # Take the minimum hash value
+
     # Step 1: Hash all shingles first
-    hashed_shingles = [hash_function(shingle.encode('utf-8')).hexdigest()[:16] for shingle in shingles]
-    hashed_shingles = [int(hash_val, 16) for hash_val in hashed_shingles]  # Convert to integer
+    hashed_shingles1 = [hash_function(shingle1.encode('utf-8')).hexdigest()[:16] for shingle1 in shingles1]
+    hashed_shingles1 = [int(hash_val, 16) for hash_val in hashed_shingles1]  # Convert to integer
+
+    hashed_shingles2 = [hash_function(shingle2.encode('utf-8')).hexdigest()[:16] for shingle2 in shingles2]
+    hashed_shingles2 = [int(hash_val, 16) for hash_val in hashed_shingles2]  # Convert to integer
+
+    #print(hashed_shingles)
+
+    random.seed(0)
 
     # Step 2: Permutate and extract min index
-    for _ in range(num_perm):
-        shuffled = list(hashed_shingles)
-        random.shuffle(shuffled)
-        min_hash = shuffled[0]
-        min_hashes.append(min_hash)
-    return set(min_hashes)
+    for _ in range(num_permutations):
+        # Shuffle the hashed shingles
+        shuffled1 = list(hashed_shingles1)
+        shuffled2 = list(hashed_shingles2)
+        st = random.getstate()
+        random.shuffle(shuffled1)
+        random.setstate(st)
+        random.shuffle(shuffled2)
+        # Take the minimum hash value
+        #min_hash = shuffled[0]
+        min_hashed_shingles1.add(shuffled1[0])
+        min_hashed_shingles2.add(shuffled2[0])
+        #min_hashes.append(min_hash)
+    #print(min_hashes)
+    #return min_hashes
 
 
 def calculate_similarity(doc1, doc2, n, num_perm, seed):
@@ -72,8 +104,10 @@ def calculate_similarity(doc1, doc2, n, num_perm, seed):
             raise ValueError("One of the documents does not contain any valid shingles.")
 
         # Generate min-hashes
-        min_hashed_shingles1 = hash_and_permute_shingles(shingles1, num_perm, seed)
-        min_hashed_shingles2 = hash_and_permute_shingles(shingles2, num_perm, seed)
+        # min_hashed_shingles1 = hash_and_permute_shingles(shingles1, num_perm, seed)
+        # min_hashed_shingles2 = hash_and_permute_shingles(shingles2, num_perm, seed)
+
+        hash_and_permute_shingles(shingles1, shingles2, num_perm)
 
         if len(min_hashed_shingles1) == 0 or len(min_hashed_shingles2) == 0:
             return
@@ -128,13 +162,16 @@ def load_document(file_path):
         raise ValueError("Unsupported file type. Please provide a .txt or .docx file.")
 
 
-file_path1 = 'documents/document_1.txt'
-file_path2 = 'documents/document_2.txt'
+file_path1 = 'documents/document1.txt'
+file_path2 = 'documents/document1_940.txt'
 
 document1 = load_document(file_path1)
 document2 = load_document(file_path2)
 n = 8  # Change this to any n for n-grams
-num_permutations = 200
+num_permutations = 2500
 seed_value = 0
+
+min_hashed_shingles1 = set()
+min_hashed_shingles2 = set()
 
 calculate_similarity(document1, document2, n, num_permutations, seed_value)

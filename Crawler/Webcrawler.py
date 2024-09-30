@@ -39,16 +39,13 @@ class WebCrawler:
         soup = BeautifulSoup(content, 'html.parser')
         text = soup.get_text()  # Extract text from the page
         print(f"Extracted text from {url}")
-
         # Extract "link-to" URLs and add them to a set to avoid duplicates.
         links = set()
         for link in soup.find_all('a', href=True):
             href = link['href']
-            # tel is still extracted
             if not (href.startswith('mailto:') or href.startswith('tel:')):
                 full_url = urljoin(url, href)  # Resolve relative URLs
                 links.add(self.normalize_url(full_url))  # Normalize and add to links set
-
         return text, links  # Return extracted text and links
 
     def crawl(self):
