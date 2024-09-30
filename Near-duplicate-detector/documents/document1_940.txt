@@ -18,6 +18,4 @@ Proin hendrerit, orci ut rhoncus facilisis, orci lorem volutpat massa, at finibu
 
 Integer quis malesuada elit. Nunc in tempor purus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris venenatis eu libero eget malesuada. Aliquam at sodales orci. Phasellus maximus nunc ac nibh elementum dapibus. Phasellus semper elit efficitur nibh sodales dapibus. Cras vel purus nec magna facilisis maximus sed et arcu. Sed gravida neque quis metus pellentesque mattis. Nulla facilisi. Sed tincidunt sapien quis volutpat dictum. Donec venenatis, lectus eget malesuada varius, nisl enim fermentum odio, nec egestas mi justo sed turpis. Nunc ut dolor congue, semper eros a, cursus lectus. Donec vitae ex eu sapien sollicitudin molestie. Curabitur non odio mattis, euismod lectus vitae, tincidunt velit.
 
-Nunc pellentesque, sem et vehicula posuere, orci nulla tincidunt lectus, eget vulputate eros metus non odio. Aliquam erat volutpat. Quisque elementum eros eu faucibus ornare. Aliquam fermentum neque sit amet turpis feugiat cursus. Praesent convallis, massa quis eleifend molestie, ipsum ligula venenatis mi, ac sodales mauris quam sed diam. Morbi eros sapien, scelerisque ut vestibulum nec, porta ac orci. Mauris et nulla porttitor felis malesuada semper. Donec placerat, est ut.
-
-Generated 11 paragraphs, 1000 words, 6617 bytes of Lorem Ipsum
+Nunc pellentesque, sem et vehicula posuere, orci nulla tincidunt lectus,
