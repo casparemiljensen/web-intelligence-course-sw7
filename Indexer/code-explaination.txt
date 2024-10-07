@@ -1,0 +1,13 @@
+Explanation:
+dictionary:
+
+A dictionary where each key is a term, and each value is a posting list (a list of document IDs where that term appears).
+We avoid duplicate document entries because the list is sorted by term and docID.
+doc_frequency:
+
+Another dictionary where the key is the term, and the value is the document frequency, which is simply the length of the postings list (the number of documents the term appears in).
+Flow:
+
+We iterate through TERM_SEQUENCE, and every time a new term is encountered, we finalize the postings list for the previous term and begin a new list for the new term.
+When a term repeats but has a new document ID, it is appended to the current postings list.
+At the end of the iteration, we finalize the postings for the last term.
