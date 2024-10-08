@@ -1,6 +1,5 @@
 import helper
 from nltk.stem import PorterStemmer
-import re
 
 ##### GLOBAL #######
 TERM_SEQUENCE = []
@@ -33,7 +32,7 @@ def remove_stop_words(tokens):
         for stopword in stop_words:
             if word == stopword:
                 tokens.remove(word)
-                print(f"Word to remove {word}")
+                # print(f"Word to remove {word}")
                 break
 
     return tokens
@@ -126,19 +125,19 @@ def insert_and_sort_term_sequence(terms, docID, TERM_SEQUENCE):
     return TERM_SEQUENCE
 
 
-def lingustic_normalization(id, doc):
-    print(f"Normalizing document {id}...")
+def lingustic_normalization(doc):
+    # print(f"Normalizing document...")
     tokens = tokenization(doc)
     tokens = remove_stop_words(tokens)
     tokens = stemming(tokens)
-    print(f"No. of Tokens: {len(tokens)}")
-    print("----------------------\n")
+    # print(f"No. of Tokens: {len(tokens)}")
+    # print("----------------------\n")
     return tokens
 
 
-def boolean_intersect(term1, term2, dictionary):
-    postings1 = dictionary.get(term1, [])
-    postings2 = dictionary.get(term2, [])
+def boolean_intersect(term1, term2):
+    postings1 = DICTIONARY.get(term1, [])
+    postings2 = DICTIONARY.get(term2, [])
 
     result = []
     i, j = 0, 0
@@ -154,121 +153,30 @@ def boolean_intersect(term1, term2, dictionary):
     return result
 
 
-def boolean_union(term1, term2, dictionary):
-    """
-    Performs a Boolean union operation on two terms.
-
-    Args:
-        term1: The first term.
-        term2: The second term.
-        dictionary: The inverted index.
-
-    Returns:
-        A sorted list of document IDs that contain either term1 or term2.
-    """
-
-    postings1 = dictionary.get(term1, [])
-    postings2 = dictionary.get(term2, [])
-
-    if not postings1 or not postings2:
-        # If either term is not found in the dictionary, return an empty list
+def eval_query(query_tokens):
+    if len(query_tokens) == 0:
         return []
 
-    return sorted([doc_id for doc_id in set(postings1 + postings2)])
+    visited = len(query_tokens)
+    result = []  # Initialize result as a list to store final results
 
-def boolean_not(term, all_docs, dictionary):
-    postings = dictionary.get(term, [])
+    # Start with the first token's postings
+    result = set(DICTIONARY.get(query_tokens[0], []))
 
-    # Get the set of all documents and subtract the documents in the term's postings
-    return sorted(list(set(all_docs) - set(postings)))
-
-
-def parse_query(query):
-    """
-    Parses a Boolean query into tokens (terms and operators).
-
-    Supports:
-    - AND
-    - OR
-    - NOT
-    - Parentheses for grouping
-    """
-    # Tokenize the query (terms, AND, OR, NOT, parentheses)
-    tokens = re.findall(r'\(|\)|AND|OR|NOT|[a-zA-Z]+', query)
-    return tokens
-
-
-def eval_query(tokens, dictionary, all_docs):
-    """
-    Evaluates a Boolean query represented as a list of tokens.
-
-    - tokens: List of query terms and operators.
-    - dictionary: The inverted index (postings lists for terms).
-    - all_docs: A list of all document IDs in the collection.
-
-    Returns: A list of document IDs satisfying the query.
-    """
-
-    def eval_and(op1, op2):
-        return boolean_intersect(op1, op2, dictionary)
-
-    def eval_or(op1, op2):
-        return boolean_union(op1, op2, dictionary)
-
-    def eval_not(op1):
-        return boolean_not(op1, all_docs, dictionary)
-
-    # Operator precedence
-    precedence = {'NOT': 3, 'AND': 2, 'OR': 1}
-
-    # Stack for values (terms and intermediate results)
-    values = []
-
-    # Stack for operators
-    operators = []
-
-    def apply_operator():
-        op = operators.pop()
-        if op == 'NOT':
-            val = values.pop()
-            values.append(eval_not(val))  # The result of NOT should be a list of IDs
+    for i in range(1, visited):
+        term = query_tokens[i]
+        if term in DICTIONARY:  # Check if the term exists in the dictionary
+            result = boolean_intersect(query_tokens[i - 1], term)
         else:
-            right = values.pop()
-            left = values.pop()
-            if op == 'AND':
-                values.append(eval_and(left, right))  # The result is a list of IDs
-            elif op == 'OR':
-                values.append(eval_or(left, right))  # The result is a list of IDs
+            return []  # If any term is not found, return empty list
 
-    # Evaluate tokens
-    for token in tokens:
-        if token == '(':
-            operators.append(token)
-        elif token == ')':
-            while operators and operators[-1] != '(':
-                apply_operator()
-            operators.pop()  # Pop '('
-        elif token in precedence:
-            while (operators and operators[-1] in precedence and
-                   precedence[operators[-1]] >= precedence[token]):
-                apply_operator()
-            operators.append(token)
-        else:
-            # This is a term; we need to ensure it is treated as a string
-            values.append(token)  # Push the term (as a string)
-
-    # Apply remaining operators
-    while operators:
-        apply_operator()
-
-    # Final result should be a list of document IDs
-    return values[0] if values else []  # Return an empty list if no values are present
+    return list(result)  # Return the final intersected results
 
 
 if __name__ == "__main__":
     # Parse and evaluate the query
 
-    doc1 = "apple THIS is'n SomThing. I want to know if it works. Hahah, nope JUST KIDDING. I'm not sure if it works. O. 2014"
+    doc1 = "aalborg engineer is'n SomThing banana. I want to know if it works. Hahah, nope JUST KIDDING. I'm not sure if it works. O. 2014"
     doc2 = "banana hello from the other side 2014"
 
     docs = [("doc1", doc1), ("doc2", doc2)]
@@ -276,7 +184,7 @@ if __name__ == "__main__":
     docs_tokens = []
 
     for id, doc in docs:
-        docs_tokens.append((id, lingustic_normalization(id, doc)))
+        docs_tokens.append((id, lingustic_normalization(doc)))
 
     for id, doc_tokens in docs_tokens:
         TERM_SEQUENCE = insert_and_sort_term_sequence(doc_tokens, id, TERM_SEQUENCE)
@@ -285,16 +193,16 @@ if __name__ == "__main__":
 
     DICTIONARY, DOC_FREQUENCY = create_dictionary_and_postings(TERM_SEQUENCE)
 
-    print("Dictionary and Postings:")
-    for term, postings in DICTIONARY.items():
-        print(f"{term}: {postings}")
+    # print("Dictionary and Postings:")
+    # for term, postings in DICTIONARY.items():
+    #     print(f"{term}: {postings}")
+    #
+    # print("\nDocument Frequencies:")
+    # for term, freq in DOC_FREQUENCY.items():
+    #     print(f"{term}: {freq}")
 
-    print("\nDocument Frequencies:")
-    for term, freq in DOC_FREQUENCY.items():
-        print(f"{term}: {freq}")
-
-    query = "apple AND (banana OR NOT orange)"
-    tokens = parse_query(query)
-    result = eval_query(tokens, DICTIONARY, docs)
-
-    print(f"Documents that satisfy the query '{query}': {result}")
+    query = "banana AND aalborg AND engineer"
+    print(f"Processing query({query})...")
+    query_tokens = lingustic_normalization(query)
+    result = eval_query(query_tokens)
+    print(f"Result: {result}")
