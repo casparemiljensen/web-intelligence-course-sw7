@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /bin/
+Disallow: /CMS/
+Disallow: /Site/
+Disallow: /Helpers/
+Disallow: /Social/
+Disallow: /UserControls/
+Disallow: /CustomerData/Files/Attachments/
+Disallow: /includes/addons/ws/
+Disallow: /ws/*.swf$
+
+
+Sitemap: https://laesehesten.dk/sitemap.xml

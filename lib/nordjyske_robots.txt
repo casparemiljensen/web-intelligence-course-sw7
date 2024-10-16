@@ -1,0 +1,32 @@
+########################################################################################################################
+### AI crawler reference                                                                                             ###
+### The link below provides instructions to what kind of content can be used to train AI models on this website      ###
+### https://nordjyske.dk/ai.txt                                                                                      ###
+########################################################################################################################
+
+# Search engines
+User-agent: *
+Allow: /
+Disallow: /index
+Disallow: /*{{window*
+Disallow: /*{{url}}*
+Disallow: /bolighandel/
+
+# Common crawl
+User-agent: CCBot
+Disallow: /
+
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Disallow: /
+
+# OpenAI (ChatGPT realtime search)
+User-agent: ChatGPT-User
+Disallow: /
+
+# Anthropic
+User-agent: anthropic-ai
+Disallow: /
+
+# Sitemap
+Sitemap: https://nordjyske.dk/sitemap.xml
