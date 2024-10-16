@@ -1,0 +1,56 @@
+Sitemap: https://www.dr.dk/sitemapindex.xml
+
+User-agent: GPTBot
+Disallow: /
+User-agent: ChatGPT-user
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCbot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-Agent: omgili
+Disallow: /
+
+User-Agent: omgilibot
+Disallow: /
+
+User-agent: *
+Disallow: /beta/
+Disallow: /bonanza20_assets/
+Disallow: /kgf
+Disallow: /kgf/
+Disallow: /tjenester/share/
+Disallow: /tjenester/esi
+Disallow: /l/
+Disallow: /nav/tekstttv/
+Disallow: /NR/exeres*
+Disallow: /nyheder/webdok/*/zone/*
+Disallow: /P3/find/
+Disallow: /programoversigttiltryk
+Disallow: /staging/
+Disallow: /stage/
+Disallow: /Templates/
+Disallow: /test/
+Disallow: /login/
+Disallow: /hydra/auth/
+Disallow: /search/*
+Disallow: /soeg/*
+Disallow: /drtv/soeg*
+Disallow: /lyd/programmer?q*
+Disallow: /cgi-bin/fttx1.exe/
+Disallow: /dr-laer/mediebiblioteket/
+Disallow: /download/Forside/2021/
+Disallow: /download/Forside/2022/
+Disallow: /nyhedsbrev/
+Disallow: /hydra/unilogin/
+Disallow: /undervisning_flash/
+Disallow: /auth/
