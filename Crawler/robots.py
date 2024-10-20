@@ -57,7 +57,7 @@ def is_allowed(url, sites):
 
 
 if __name__ == "__main__":
-    robots_txt = helper.read_text_file("../lib/laesehesten_robots.txt")
+    robots_txt = helper.read_text_file("../lib/robots_txt-test-files/laesehesten_robots.txt")
     disallowed_sites = parse_robots_txt(robots_txt)
     for agent, paths in disallowed_sites.items():
 
