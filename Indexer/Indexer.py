@@ -1,10 +1,20 @@
+import json
+import os
+
 import helper
 from nltk.stem import PorterStemmer
 
 ##### GLOBAL #######
-TERM_SEQUENCE = []
-DICTIONARY = {}  # Initialize the dictionary for postings
+TERM_SEQUENCE = []  # Initialize the sequence of terms
+INVERTED_INDEX = {}  # Initialize the dictionary for postings
 DOC_FREQUENCY = {}  # Initialize document frequency tracking
+
+# To do strip and remove white spaces
+# what about æøå - only handle english texts.
+# alter eval_query to read from inverted_index.json and doc_frequency.json, now it reads empty inverted index, thats why it does not work.
+# something wrong with the eval query and bool intersect, not getting dicts and freqs.
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "./../"))
 
 
 def tokenization(doc):
@@ -27,7 +37,9 @@ def tokenization(doc):
 
 
 def remove_stop_words(tokens):
-    stop_words = helper.load_document("stopwords_en.txt").split("\n")
+    directory = os.path.join(PROJECT_ROOT, "indexer", "stopwords_en.txt")
+
+    stop_words = helper.load_document(directory).split("\n")
     for word in tokens:
         for stopword in stop_words:
             if word == stopword:
@@ -45,7 +57,7 @@ def stemming(tokens):
     return stemmed_tokens
 
 
-def insert_into_dictionary(terms, docID, dictionary, doc_frequency):
+def insert_into_inverted_index(terms, docID, index, doc_frequency):
     """
     Inserts terms along with their docID into the dictionary and postings structure.
 
@@ -55,20 +67,20 @@ def insert_into_dictionary(terms, docID, dictionary, doc_frequency):
     - doc_frequency: The dictionary where terms map to their document frequency.
     """
     for term in terms:
-        if term not in dictionary:
-            dictionary[term] = []  # Initialize postings list for new term
+        if term not in index:
+            index[term] = []  # Initialize postings list for new term
 
         # Avoid adding duplicate docIDs
-        if not dictionary[term] or dictionary[term][-1] != docID:
-            dictionary[term].append(docID)
+        if not index[term] or index[term][-1] != docID:
+            index[term].append(docID)
 
     # Update document frequency
     for term in terms:
-        if term in dictionary:
-            doc_frequency[term] = len(dictionary[term])  # Update frequency count
+        if term in index:
+            doc_frequency[term] = len(index[term])  # Update frequency count
 
 
-def create_dictionary_and_postings(TERM_SEQUENCE):
+def create_dictionary_and_postings():
     """
     Constructs a dictionary and postings list from the TERM_SEQUENCE.
 
@@ -107,7 +119,7 @@ def create_dictionary_and_postings(TERM_SEQUENCE):
     return dictionary, doc_frequency
 
 
-def insert_and_sort_term_sequence(terms, docID, TERM_SEQUENCE):
+def insert_and_sort_term_sequence(terms, docID):
     """
     Inserts terms along with their docID into TERM_SEQUENCE and keeps it sorted.
 
@@ -122,8 +134,6 @@ def insert_and_sort_term_sequence(terms, docID, TERM_SEQUENCE):
     # First by term, then by docID.
     TERM_SEQUENCE.sort(key=lambda pair: (pair[0], pair[1]))
 
-    return TERM_SEQUENCE
-
 
 def lingustic_normalization(doc):
     # print(f"Normalizing document...")
@@ -136,8 +146,16 @@ def lingustic_normalization(doc):
 
 
 def boolean_intersect(term1, term2):
-    postings1 = DICTIONARY.get(term1, [])
-    postings2 = DICTIONARY.get(term2, [])
+    if type(term1) is list and type(term2) is list:
+        postings1 = term1
+        postings2 = term2
+    elif type(term1) is str and type(term2) is str:
+        postings1 = INVERTED_INDEX.get(term1, [])
+        postings2 = INVERTED_INDEX.get(term2, [])
+
+
+    else:
+        return []
 
     result = []
     i, j = 0, 0
@@ -153,24 +171,67 @@ def boolean_intersect(term1, term2):
     return result
 
 
-def eval_query(query_tokens):
+def eval_query(query):
+    global INVERTED_INDEX
+    query_tokens = lingustic_normalization(query)
+    DOC_FREQUENCY = helper.load_document(os.path.join(PROJECT_ROOT, "lib", "index_data", "doc_frequency.json"))
+    INVERTED_INDEX = helper.load_document(os.path.join(PROJECT_ROOT, "lib", "index_data", "inverted_index.json"))
+
     if len(query_tokens) == 0:
         return []
 
+    # Check if there is any query token not in the doc_frequency
+    for query_token in query_tokens:
+        if query_token not in DOC_FREQUENCY:
+            return []
+
     visited = len(query_tokens)
-    result = []  # Initialize result as a list to store final results
+    total_result = []
 
-    # Start with the first token's postings
-    result = set(DICTIONARY.get(query_tokens[0], []))
+    # Iterating over all query terms.
+    # If only two terms, we return after one iteration.
+    # Else we intersect the current result with new result of two terms.
+    while visited > 0:
+        for i in range(len(query_tokens)):
+            term1 = query_tokens[i]
+            term2 = query_tokens[i - 1]
+            if term1 in INVERTED_INDEX and term2 in INVERTED_INDEX:
+                partial_res = boolean_intersect(term1, term2)
+                if len(total_result) > 0:
+                    total_result = boolean_intersect(total_result, partial_res)
+                else:
+                    total_result = partial_res
+                visited -= 1
+            else:
+                return []
+    return list(total_result)  # Return the final intersected results
 
-    for i in range(1, visited):
-        term = query_tokens[i]
-        if term in DICTIONARY:  # Check if the term exists in the dictionary
-            result = boolean_intersect(query_tokens[i - 1], term)
-        else:
-            return []  # If any term is not found, return empty list
 
-    return list(result)  # Return the final intersected results
+# Function to save a dictionary to a JSON file
+def save_dict_to_json(data, filename):
+    with open(filename, 'w', encoding='utf-8') as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
+
+
+def run_indexer():
+    docs = helper.load_documents_from_directory("lib/crawled_pages")
+    docs_tokens = []
+
+    for id, doc in docs:
+        docs_tokens.append((id, lingustic_normalization(doc)))
+
+    for id, doc_tokens in docs_tokens:
+        insert_and_sort_term_sequence(doc_tokens, id)
+
+    INVERTED_INDEX, DOC_FREQUENCY = create_dictionary_and_postings()
+
+    # # Create the output directory if it doesn't exist
+    output_dir = "lib/index_data"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Save inverted index and document frequency to separate files
+    save_dict_to_json(INVERTED_INDEX, os.path.join(output_dir, 'inverted_index.json'))
+    save_dict_to_json(DOC_FREQUENCY, os.path.join(output_dir, 'doc_frequency.json'))
 
 
 if __name__ == "__main__":
@@ -187,22 +248,20 @@ if __name__ == "__main__":
         docs_tokens.append((id, lingustic_normalization(doc)))
 
     for id, doc_tokens in docs_tokens:
-        TERM_SEQUENCE = insert_and_sort_term_sequence(doc_tokens, id, TERM_SEQUENCE)
-        # for i in TERM_SEQUENCE:
-        # print(i)
+        insert_and_sort_term_sequence(doc_tokens, id)
 
-    DICTIONARY, DOC_FREQUENCY = create_dictionary_and_postings(TERM_SEQUENCE)
+    INVERTED_INDEX, DOC_FREQUENCY = create_dictionary_and_postings()
 
-    # print("Dictionary and Postings:")
-    # for term, postings in DICTIONARY.items():
-    #     print(f"{term}: {postings}")
-    #
-    # print("\nDocument Frequencies:")
-    # for term, freq in DOC_FREQUENCY.items():
-    #     print(f"{term}: {freq}")
+    print("Dictionary and Postings:")
+    for term, postings in INVERTED_INDEX.items():
+        print(f"{term}: {postings}")
+
+    print("\nDocument Frequencies:")
+    for term, freq in DOC_FREQUENCY.items():
+        print(f"{term}: {freq}")
 
     query = "banana AND aalborg AND engineer"
     print(f"Processing query({query})...")
-    query_tokens = lingustic_normalization(query)
-    result = eval_query(query_tokens)
+
+    result = eval_query(query)
     print(f"Result: {result}")
