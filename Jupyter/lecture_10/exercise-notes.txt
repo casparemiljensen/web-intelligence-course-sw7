@@ -1,0 +1,23 @@
+5. Comparing LSA and Skip-gram
+Feature	LSA	Skip-gram
+Type	Matrix decomposition	Neural-based
+Input	Term-document matrix	Word-context pairs
+Output	Word-topic embeddings	Word embeddings
+Captures	Global co-occurrence patterns	Local context and word order
+Scalability	Limited for large datasets	Scales better with large datasets
+Interpretability	High	Medium
+Context	Ignores local word order and context	Captures local context
+6. Summary of the Exercise
+LSA:
+Use matrix decomposition to find latent semantic relationships in text.
+Focus on global word-document relationships.
+Skip-gram:
+Use neural networks to predict context words given a target word.
+Learn embeddings that capture local context and relationships.
+By implementing and analyzing both methods, you'll gain a deeper understanding of how word embeddings work, their strengths and limitations, and their applications in real-world natural language processing tasks.
+
+
+
+
+
+
