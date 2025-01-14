@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+Jupyter/lecture_10/GoogleNews-vectors-negative300.bin.gz
+
+recommender-system/data/Software.json.gz
+recommender-system/data/meta_Software.json.gz
