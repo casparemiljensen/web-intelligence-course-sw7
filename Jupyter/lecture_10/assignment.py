@@ -42,7 +42,7 @@ def visualize_embeddings(model, top_n=100):
 #     return sentences
 
 
-def load_data(file_path, max_lines=1000, batch_size=500):
+def load_data(file_path, max_lines=2000, batch_size=5000):
     stop_words = set(stopwords.words('english'))  # Precompute stopwords set
     sentences = []
 
@@ -86,10 +86,12 @@ print(f"Loaded {len(sentences)} sentences.")
 # The value 10 means that for each positive training example, 10 "negative" samples (random words from the vocabulary) are drawn and trained against.
 
 # Train SkipGram model
-model_skipgram = Word2Vec(sentences, vector_size=100, window=3, sg=1, negative=10, epochs=100)
+model_skipgram = Word2Vec(sentences, vector_size=100, window=3, sg=1, negative=10, epochs=3)
 
 # Train CBOW model
-model_cbow = Word2Vec(sentences, vector_size=100, window=3, sg=0, negative=10, epochs=100)
+model_cbow = Word2Vec(sentences, vector_size=100, window=3, sg=0, negative=10, epochs=3)
+
+# This is SkipGram using Word2Vec
 
 
 print("Training started")
